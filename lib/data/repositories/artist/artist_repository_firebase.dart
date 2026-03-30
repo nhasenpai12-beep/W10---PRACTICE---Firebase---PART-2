@@ -7,8 +7,10 @@ import '../../dtos/artist_dto.dart';
 import 'artist_repository.dart';
 
 class ArtistRepositoryFirebase implements ArtistRepository {
+  static const String _baseUrl =
+      'w10-database-default-rtdb.asia-southeast1.firebasedatabase.app';
   final Uri artistsUri = Uri.https(
-    'test-a2a77-default-rtdb.asia-southeast1.firebasedatabase.app',
+    _baseUrl,
     '/artists.json',
   );
 
@@ -32,5 +34,23 @@ class ArtistRepositoryFirebase implements ArtistRepository {
   }
 
   @override
-  Future<Artist?> fetchArtistById(String id) async {}
+  Future<Artist?> fetchArtistById(String id) async {
+    final Uri artistUri = Uri.https(
+      _baseUrl,
+      '/artists/$id.json',
+    );
+
+    final http.Response response = await http.get(artistUri);
+
+    if (response.statusCode == 200) {
+      if (response.body.isEmpty || response.body == 'null') {
+        return null;
+      }
+
+      final Map<String, dynamic> artistJson = json.decode(response.body);
+      return ArtistDto.fromJson(id, artistJson);
+    } else {
+      throw Exception('Failed to load artist');
+    }
+  }
 }

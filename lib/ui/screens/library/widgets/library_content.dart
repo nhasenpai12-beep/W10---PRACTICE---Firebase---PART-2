@@ -24,6 +24,7 @@ class LibraryContent extends StatelessWidget {
         break;
       case AsyncValueState.error:
         content = Center(child: Text('error = ${asyncValue.error!}', style: TextStyle(color: Colors.red),));
+        break;
 
       case AsyncValueState.success:
         List<LibraryItemData> data = asyncValue.data!;
@@ -34,6 +35,9 @@ class LibraryContent extends StatelessWidget {
             isPlaying: mv.isSongPlaying(data[index].song),
             onTap: () {
               mv.start(data[index].song);
+            },
+            onLike: () {
+              mv.likeSong(data[index]);
             },
           ),
         );
