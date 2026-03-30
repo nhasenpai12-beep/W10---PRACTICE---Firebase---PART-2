@@ -9,16 +9,26 @@ import 'artist_repository.dart';
 class ArtistRepositoryFirebase implements ArtistRepository {
   static const String _baseUrl =
       'w10-database-default-rtdb.asia-southeast1.firebasedatabase.app';
+  List<Artist>? _cachedArtists;
   final Uri artistsUri = Uri.https(
     _baseUrl,
     '/artists.json',
   );
 
   @override
-  Future<List<Artist>> fetchArtists() async {
+  Future<List<Artist>> fetchArtists({bool forceFetch = false}) async {
+    if (!forceFetch && _cachedArtists != null) {
+      return _cachedArtists!;
+    }
+
     final http.Response response = await http.get(artistsUri);
 
     if (response.statusCode == 200) {
+      if (response.body.isEmpty || response.body == 'null') {
+        _cachedArtists = [];
+        return _cachedArtists!;
+      }
+
       // 1 - Send the retrieved list of songs
       Map<String, dynamic> songJson = json.decode(response.body);
 
@@ -26,6 +36,7 @@ class ArtistRepositoryFirebase implements ArtistRepository {
       for (final entry in songJson.entries) {
         result.add(ArtistDto.fromJson(entry.key, entry.value));
       }
+      _cachedArtists = result;
       return result;
     } else {
       // 2- Throw expcetion if any issue

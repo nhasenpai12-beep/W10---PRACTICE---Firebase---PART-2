@@ -18,17 +18,34 @@ class LibraryContent extends StatelessWidget {
 
     Widget content;
     switch (asyncValue.state) {
-      
       case AsyncValueState.loading:
-        content = Center(child: CircularProgressIndicator());
+        content = ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: const [
+            SizedBox(height: 120),
+            Center(child: CircularProgressIndicator()),
+          ],
+        );
         break;
       case AsyncValueState.error:
-        content = Center(child: Text('error = ${asyncValue.error!}', style: TextStyle(color: Colors.red),));
+        content = ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            const SizedBox(height: 120),
+            Center(
+              child: Text(
+                'error = ${asyncValue.error!}',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
         break;
 
       case AsyncValueState.success:
         List<LibraryItemData> data = asyncValue.data!;
         content = ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: data.length,
           itemBuilder: (context, index) => LibraryItemTile(
             data: data[index],
@@ -52,7 +69,12 @@ class LibraryContent extends StatelessWidget {
           Text("Library", style: AppTextStyles.heading),
           SizedBox(height: 50),
 
-          Expanded(child: content),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: mv.refresh,
+              child: content,
+            ),
+          ),
         ],
       ),
     );

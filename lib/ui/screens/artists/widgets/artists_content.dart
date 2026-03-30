@@ -20,19 +20,33 @@ class ArtistsContent extends StatelessWidget {
     Widget content;
     switch (asyncValue.state) {
       case AsyncValueState.loading:
-        content = Center(child: CircularProgressIndicator());
+        content = ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: const [
+            SizedBox(height: 120),
+            Center(child: CircularProgressIndicator()),
+          ],
+        );
         break;
       case AsyncValueState.error:
-        content = Center(
-          child: Text(
-            'error = ${asyncValue.error!}',
-            style: TextStyle(color: Colors.red),
-          ),
+        content = ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: [
+            const SizedBox(height: 120),
+            Center(
+              child: Text(
+                'error = ${asyncValue.error!}',
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
         );
+        break;
 
       case AsyncValueState.success:
         List<Artist> artists = asyncValue.data!;
         content = ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
           itemCount: artists.length,
           itemBuilder: (context, index) => ArtistTile(artist: artists[index]),
         );
@@ -47,7 +61,12 @@ class ArtistsContent extends StatelessWidget {
           Text("Library", style: AppTextStyles.heading),
           SizedBox(height: 50),
 
-          Expanded(child: content),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: mv.refresh,
+              child: content,
+            ),
+          ),
         ],
       ),
     );
